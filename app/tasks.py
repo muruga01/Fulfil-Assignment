@@ -10,7 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
 import asyncio
 
-celery=Celery(__name__,broker=os.getenv("REDIS_URL","redis://localhost:6379/0"))
+celery = Celery(__name__, broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"))
+
 @celery.task(bind=True)
 def import_products_from_csv(self, file_path: str, task_id: str):
     total_processed = 0
