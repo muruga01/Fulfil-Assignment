@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: acme-importer
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT & celery -A app.tasks.celery worker --loglevel=info
+    envVars:
+      DATABASE_URL: { fromDatabase: acme-db, property: connectionString }
+      REDIS_URL: { fromService: acme-redis, property: connectionString }
+
+databases:
+  - name: acme-db
+    plan: free
+
+services:
+  - type: redis
+    name: acme-redis
+    plan: free

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Acme Product Importer</title>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-10">
+    <h1 class="text-3xl font-bold mb-8">Acme Product Importer</h1>
+    
+    <form hx-post="/upload" hx-encoding="multipart/form-data" hx-target="#result" class="space-y-6">
+      <div>
+        <label class="block text-lg font-medium">Upload Products CSV (up to 500K rows)</label>
+        <input type="file" name="file" accept=".csv" required class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded file:border-0 file:bg-blue-600 file:text-white"/>
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded hover:bg-blue-700">Upload & Import</button>
+    </form>
+
+    <div id="result" class="mt-8"></div>
+  </div>
+
+  <script>
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+      if (evt.detail.xhr.responseURL.includes('/upload')) {
+        const taskId = JSON.parse(evt.detail.xhr.responseText).task_id;
+        const es = new EventSource(`/progress/${taskId}`);
+        const progressDiv = document.createElement('div');
+        progressDiv.innerHTML = `<div class="mt-8 p-6 bg-gray-50 rounded">
+          <div class="text-xl">Importing... <span id="p">0</span>%</div>
+          <div class="w-full bg-gray-300 h-10 rounded mt-2"><div id="bar" class="bg-green-600 h-10 rounded" style="width:0%"></div></div>
+          <p id="status" class="mt-2">Starting...</p>
+        </div>`;
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('result').appendChild(progressDiv);
+
+        es.onmessage = function(e) {
+          const data = JSON.parse(e.data);
+          document.getElementById('p').textContent = data.percent || 0;
+          document.getElementById('bar').style.width = (data.percent || 0) + '%';
+          document.getElementById('status').textContent = data.status || 'Processing...';
+          if (data.percent === 100) es.close();
+        };
+      }
+    });
+  </script>
+</body>
+</html>
