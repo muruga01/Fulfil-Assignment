@@ -7,6 +7,7 @@ from app.tasks import import_csv_task
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete, text
 import os, uuid, shutil, redis, json
+from sqlalchemy.exc import OperationalError
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
