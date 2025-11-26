@@ -52,7 +52,7 @@ def import_csv_task(self, file_path: str, task_id: str):
 
     os.unlink(file_path)
 def process_batch(batch,task_id):
-    engine_sync = create_engine(os.getenv("DATABASE_URL").replace("asyncpg","psycopg2"))
+    engine_sync = create_engine(os.getenv("DATABASE_URL").replace("asyncpg","psycopg"))
     insert_stmt = pg_insert(Product).values(batch)
     stmt = insert_stmt.on_conflict_do_update(
         index_elements=['sku_upper'],
