@@ -13,8 +13,16 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Retry connecting to DB on startup
+    for i in range(10):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            break
+        except OperationalError:
+            if i == 9:
+                raise
+            await asyncio.sleep(3)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
