@@ -1,7 +1,7 @@
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import (Column, Integer, String, ForeignKey, DateTime, Text, Boolean, Numeric, func)
+from sqlalchemy import (Column, Integer, String, ForeignKey, DateTime, Text, Boolean, Numeric, func, Computed)
 
 Base=declarative_base()
 
@@ -10,7 +10,7 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     sku=Column(String(50), nullable=False)
-    sku_upper = Column(String(100), generated_always_as=func.upper(sku), stored=True, index=True, unique=True)
+    sku_upper = Column(String(100), Computed("upper(sku)", persisted=True), index=True, unique=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric(10, 2))
