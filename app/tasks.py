@@ -5,6 +5,7 @@ from celery import Celery
 from app.database import engine
 from app.models import Product, Webhook
 from sqlalchemy import select
+from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 import httpx
@@ -13,7 +14,7 @@ import asyncio
 celery = Celery(__name__, broker=os.getenv("REDIS_URL", "redis://localhost:6379/0"))
 
 @celery.task(bind=True)
-def import_products_from_csv(self, file_path: str, task_id: str):
+def import_csv_task(self, file_path: str, task_id: str):
     total_processed = 0
     batch_size=1000
     batch=[]
@@ -51,7 +52,6 @@ def import_products_from_csv(self, file_path: str, task_id: str):
 
     os.unlink(file_path)
 def process_batch(batch,task_id):
-    from sqlalchemy import create_engine
     engine_sync = create_engine(os.getenv("DATABASE_URL").replace("asyncpg","psycopg2"))
     insert_stmt = pg_insert(Product).values(batch)
     stmt = insert_stmt.on_conflict_do_update(
