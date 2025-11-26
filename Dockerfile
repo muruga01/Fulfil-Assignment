@@ -11,7 +11,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-# Install Python dependencies, psycopg2 will be compiled on install
+# Install Python dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
