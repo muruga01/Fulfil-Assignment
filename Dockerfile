@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-# Install Python dependencies.
+# Install Python dependencies with psycopg (psycopg3) using precompiled binary wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
